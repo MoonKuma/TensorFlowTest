@@ -42,9 +42,18 @@ def RNN(X):
     # 定义LSTM基本CELL，中间隐藏层block数：lstm_size（100）
     #lstm_cell = tf.contrib.rnn.LSTMBlockFusedCell(lstm_size)
     lstm_cell = tf.contrib.rnn.LSTMBlockCell(lstm_size)
-    # final_state[0]是cell state
-    # final_state[1]是hidden_state
+
+    # 运行LSTM网络，得到输出结果
     outputs, final_state = tf.nn.dynamic_rnn(lstm_cell, inputs, dtype=tf.float32)
+    """
+    经过LSTM的运行两个输出，output和final_state；
+    output里面，包含了所有时刻的输出 H；
+    final_state里面，包含了最后一个时刻的输出 C（cell state） 和 H（hidden_state）
+      final_state[0]:是最后一个时刻的 cell state 输出
+      final_state[1]:是最后一个时刻的hidden_state 输出
+    所以如果想用dynamic_rnn得到最终状态的输出，只需要最后一个时刻的状态输出，直接使用final_state[1]就可以了
+    (其实final_state[1] 和 output最后一个时刻的值一样)。
+    """
     results = tf.nn.softmax(tf.matmul(final_state[1], weights) + biases)
     return results
 
