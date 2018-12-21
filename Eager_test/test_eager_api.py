@@ -16,16 +16,19 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import matplotlib.pyplot as plt
-
+from modenship_data.get_local import local_path
 import tensorflow as tf
 import tensorflow.contrib.eager as tfe
 
 tf.enable_eager_execution()
 
-train_dataset_url = "http://download.tensorflow.org/data/iris_training.csv"
+# train_dataset_url = "http://download.tensorflow.org/data/iris_training.csv"
+#
+# train_dataset_fp = tf.keras.utils.get_file(fname=os.path.basename(train_dataset_url),
+#                                            origin=train_dataset_url)
 
-train_dataset_fp = tf.keras.utils.get_file(fname=os.path.basename(train_dataset_url),
-                                           origin=train_dataset_url)
+train_dataset_fp = 'test_data/iris_training.csv'
+test_dataset_fp = 'test_data/iris_test.csv'
 
 print("Local copy of the dataset file: {}".format(train_dataset_fp))
 
@@ -35,8 +38,10 @@ column_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width', 's
 feature_names = column_names[:-1]
 label_name = column_names[-1]
 
-print("Features: {}".format(feature_names))
-print("Label: {}".format(label_name))
+# print("Features: {}".format(feature_names))
+# print("Label: {}".format(label_name))
+
+
 
 batch_size = 32
 
@@ -47,12 +52,22 @@ train_dataset = tf.contrib.data.make_csv_dataset(
     label_name=label_name,
     num_epochs=1)
 
+test_dataset = tf.contrib.data.make_csv_dataset(
+    test_dataset_fp,
+    batch_size,
+    column_names=column_names,
+    label_name=label_name,
+    num_epochs=1)
+
+
+
 def pack_features_vector(features, labels):
   """Pack the features into a single array."""
   features = tf.stack(list(features.values()), axis=1)
   return features, labels
 
 train_dataset = train_dataset.map(pack_features_vector)
+test_dataset = test_dataset.map(pack_features_vector)
 
 features, labels = next(iter(train_dataset))
 
@@ -127,5 +142,17 @@ for epoch in range(num_epochs):
     print("Epoch {:03d}: Loss: {:.3f}, Accuracy: {:.3%}".format(epoch,
                                                                 epoch_loss_avg.result(),
                                                                 epoch_accuracy.result()))
+
+
+print('FINISH TRAINING')
+
+test_accuracy = tfe.metrics.Accuracy()
+
+for (x, y) in test_dataset:
+    print(x,y)
+    logits = model(x)
+    prediction = tf.argmax(logits, axis=1, output_type=tf.int32)
+    test_accuracy(prediction, y)
+print("Test set accuracy: {:.3%}".format(test_accuracy.result()))
 
 
