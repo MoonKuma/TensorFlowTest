@@ -17,6 +17,7 @@ from __future__ import absolute_import, division, print_function
 
 import os
 import matplotlib.pyplot as plt
+from modenship_data.get_local import local_path
 
 import tensorflow as tf
 import tensorflow.contrib.eager as tfe
@@ -45,7 +46,7 @@ train_num = 20000
 column_names = ['datetime', 'uid', 'level', 'vip_level', 'pay_money', 'diamond_remain', 'online_time', 'login']
 select_columns = [ 'level', 'vip_level', 'diamond_remain', 'online_time', 'login']
 column_defaults = [ tf.float32, tf.float32, tf.float32, tf.float32, tf.int32]
-train_dataset = tf.data.experimental.make_csv_dataset(file_pattern=train_filenames, batch_size=100,
+train_dataset = tf.data.experimental.make_csv_dataset(file_pattern=local_path(train_filenames[0]), batch_size=100,
                                                 shuffle_buffer_size=20000,
                                                 shuffle=True,
                                                 column_defaults=column_defaults,
@@ -56,7 +57,7 @@ train_dataset = tf.data.experimental.make_csv_dataset(file_pattern=train_filenam
                                                 select_columns=select_columns,
                                                 field_delim='\t').map(pack_features_vector)
 
-test_dataset = tf.data.experimental.make_csv_dataset(file_pattern=test_filenames, batch_size=100,
+test_dataset = tf.data.experimental.make_csv_dataset(file_pattern=local_path(test_filenames[0]), batch_size=100,
                                                 shuffle_buffer_size=20000,
                                                 shuffle=True,
                                                 column_defaults=column_defaults,

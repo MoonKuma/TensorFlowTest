@@ -40,10 +40,17 @@ x_test, y_test = npy.split(data, (4,), axis=1)
 
 # x = x[:, :4] # as dimension increased, the accuracy for prediction (both train and test) adds up, which means adding dimension could still benefit the prediction
 # x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=1, train_size=0.6)
-clf = svm.SVC(C=0.8, kernel='rbf', gamma=1, decision_function_shape='ovr')
+clf = svm.SVC()
 clf.fit(x_train, y_train.ravel())
+'''
+
+
+'''
+
 y_hat_train = clf.predict(x_train)
 y_hat_test = clf.predict(x_test)
-print(show_accuracy(y_hat_train, y_train, 'train-predict_c0.8'))
-print(show_accuracy(y_hat_test, y_test, 'test-predict_c0.8'))
+print("***")
+print(show_accuracy(y_hat_train, y_train, 'train-predict_auto'))
+print("***")
+print(show_accuracy(y_hat_test, y_test, 'test-predict_auto'))
 
