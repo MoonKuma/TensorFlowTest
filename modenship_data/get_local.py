@@ -14,6 +14,6 @@ def local_path(file_name):
     if os.path.exists(file_full_name):
         return [file_full_name]
     else:
-        msg = '[Error]File Not Exist: ' + file_full_name
+        msg = '[Caution]File Not Exist: ' + file_full_name
         print(msg)
-        raise RuntimeError
+        return [file_full_name]
