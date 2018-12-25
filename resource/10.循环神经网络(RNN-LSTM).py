@@ -35,7 +35,8 @@ batch_size_p = tf.placeholder(tf.int32, [], name='batch_size')
 keep_prod = tf.placeholder(tf.float32)
 
 # 初始化权值，lstm_size:行是100,相当于中间隐藏层block的个数，n_classes：列是10（10个分类），只定义了一个隐藏层
-weights = tf.Variable(tf.truncated_normal([lstm_size, n_classes], stddev=0.1))
+# weights = tf.Variable(tf.truncated_normal([lstm_size, n_classes], stddev=0.1))
+weights = tf.Variable(tf.truncated_normal([lstm_size*2, n_classes], stddev=0.1))
 # 初始化偏置值，因为只有10个分类，所以偏置值也是n_classes：10个
 biases = tf.Variable(tf.constant(0.1, shape=[n_classes]))
 
@@ -46,13 +47,38 @@ def RNN(X):
     inputs = tf.reshape(X, [-1, max_time, n_inputs])
 
     # 定义单层LSTM基本CELL，中间隐藏层block数：lstm_size
-    lstm_cell = tf.contrib.rnn.LSTMBlockCell(num_units=lstm_size)
-    # rnn DropoutWrapper
-    lstm_cell = tf.contrib.rnn.DropoutWrapper(cell=lstm_cell, output_keep_prob=keep_prod)
-    # An initial state for the RNN and call lstm_cell.zero_state Return zero-filled state tensor(s).
-    init_state = lstm_cell.zero_state(batch_size_p, dtype=tf.float32)
-    outputs, final_state = tf.nn.dynamic_rnn(lstm_cell, inputs, initial_state=init_state, dtype=tf.float32)
-    final_hidden_state = final_state[1]
+    # lstm_cell = tf.contrib.rnn.LSTMBlockCell(num_units=lstm_size)
+    # # rnn DropoutWrapper
+    # lstm_cell = tf.contrib.rnn.DropoutWrapper(cell=lstm_cell, output_keep_prob=keep_prod)
+    # # An initial state for the RNN and call lstm_cell.zero_state Return zero-filled state tensor(s).
+    # init_state = lstm_cell.zero_state(batch_size_p, dtype=tf.float32)
+    # outputs, final_state = tf.nn.dynamic_rnn(lstm_cell, inputs, initial_state=init_state, dtype=tf.float32)
+    # final_hidden_state = final_state[1]
+
+    '''
+    单层动态双向LSTM单元的输出
+    Bi - RNN又叫双向RNN，是采用了两个方向的RNN网络。
+    RNN网络擅长的是对于连续数据的处理，既然是连续的数据规律，我们不仅可以学习他的正向规律，还可以学习他的反向规律。
+    这样正向和反向结合的网络，会比单向循环网络有更高的拟合度。
+    双向RNN的处理过程和单向RNN非常相似，就是在正向传播的基础上再进行一次反向传播，而且这两个都连接这一个输出层。
+    '''
+    # 正向
+    lstm_fw_cell = tf.contrib.rnn.LSTMBlockCell(num_units=lstm_size, forget_bias=1.0)
+    init_fw_state = lstm_fw_cell.zero_state(batch_size_p, dtype=tf.float32)
+    # 反向
+    lstm_bw_cell = tf.contrib.rnn.LSTMBlockCell(num_units=lstm_size, forget_bias=1.0)
+    init_bw_state = lstm_bw_cell.zero_state(batch_size_p, dtype=tf.float32)
+    # 动态rnn函数传入的是一个三维张量，[batch_size,n_steps,n_input]  输出是一个元组 每一个元素也是这种形状
+    hiddens, state = tf.nn.bidirectional_dynamic_rnn(cell_fw=lstm_fw_cell, cell_bw=lstm_bw_cell, initial_state_fw=init_fw_state, initial_state_bw=init_bw_state, inputs=inputs, dtype=tf.float32)
+    print('hiddens:\n', type(hiddens), len(hiddens),type(hiddens[0]), type(hiddens[1]),hiddens[0].shape, hiddens[1].shape)
+    print('state:\n', type(state), len(state),type(state[0][1]),type(state[1][1]),state[0][1].shape,state[1][1].shape)
+    # 按axis=2合并 (?,28,128) (?,28,128)按最后一维合并(?,28,256)
+    #hiddens = tf.concat(hiddens, axis=2)
+    # 注意这里输出需要转置  转换为时序优先的
+    #final_hidden_state = tf.transpose(hiddens, [1, 0, 2])[-1]
+    # 按axis=2合并 (?,128) (?,128)按最后一维合并(?,256)
+    state = tf.concat(state, axis=2)
+    final_hidden_state = state[1]
 
     # FusedRNNCell 针对mnist数据如何定义输入shape？ 目前方式不对 还需研究！！
     # FusedRNNCell instance should be time-major
