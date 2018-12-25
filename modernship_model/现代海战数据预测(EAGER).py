@@ -35,8 +35,8 @@ def pack_features_vector(features, labels):
 
 # test data set
 # filenames = ['modenship_data/tf_data_modernshiplogin_newuser.txt']
-train_filenames = ['tf_data_modernshiplogin_newuser_train.txt']
-test_filenames = ['tf_data_modernshiplogin_newuser_test.txt']
+train_filenames = ['tf_data_modernshiplogin_newuser_train_small.txt']
+test_filenames = ['tf_data_modernshiplogin_newuser_test_small.txt']
 # 训练样本数据
 train_num_examples = 4000000
 # 测试样本数据
@@ -138,8 +138,8 @@ for epoch in range(num_epochs):
         train_loss_results.append(epoch_loss_avg.result())
         train_accuracy_results.append(epoch_accuracy.result())
 
-    # if epoch % 50 == 0:
-    print("Epoch {:03d}: Loss: {:.3f}, Accuracy: {:.3%}".format(epoch,
+    if epoch % 50 == 0:
+        print("Epoch {:03d}: Loss: {:.3f}, Accuracy: {:.3%}".format(epoch,
                                                                 epoch_loss_avg.result(),
                                                                 epoch_accuracy.result()))
 
@@ -167,5 +167,12 @@ print("Test set accuracy: {:.3%}".format(test_accuracy.result()))
 #
 # model.fit(train_dataset, epochs=10, steps_per_epoch=300)
 
-
-
+'''
+# As a result, this tf classifier works only a little better than its competitors(SVM or Linear) on full data scale
+# Accuracy:
+# - TF(full data): 77.3%
+# - TF(small data): 70.2%
+# - SVM(small data): 75.7%
+# - Linear/Logistic(full/small data): 75.0%
+# BTW, svm is incapable in running with full data scale
+'''
