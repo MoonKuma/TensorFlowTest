@@ -154,7 +154,7 @@ with tf.Session() as sess:
 
     print("Optimization Finished!")
 
-    """
+    """ 
     # # Applying encode and decode over test set
     encode_decode = sess.run(y_pred, feed_dict={X: mnist.test.images[:examples_to_show]})
     # Compare original images with their reconstructions
