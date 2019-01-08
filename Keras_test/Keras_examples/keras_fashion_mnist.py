@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File  : test_basic_keras.py
+# @File  : keras_fashion_mnist.py
 # @Author: MoonKuma
 # @Date  : 2019/1/7
 # @Desc  : https://www.tensorflow.org/tutorials/keras/basic_classification
