@@ -47,6 +47,7 @@ test_data = keras.preprocessing.sequence.pad_sequences(test_data,
 vocab_size = 10000
 
 model = keras.Sequential()
+# Embedding is a word 2 vec techniques, making the sparse word vectors more dense(in a way like PCA), decrease the imput nodes and free model from overfitting
 model.add(keras.layers.Embedding(vocab_size, 16))
 model.add(keras.layers.GlobalAveragePooling1D())
 model.add(keras.layers.Dense(16, activation=tf.nn.relu))
